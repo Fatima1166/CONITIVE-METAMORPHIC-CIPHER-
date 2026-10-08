@@ -2,6 +2,7 @@
 /*
  * COGNITIVE METAMORPHIC CIPHER (CMC) SYSTEM
  * Browser Interface Only
+ * UI: Full-screen app shell (sidebar + split workspace)
  */
 class CognitiveMetamorphicCipher {
     // Personal developer details (as requested)
@@ -24,34 +25,75 @@ class CognitiveMetamorphicCipher {
     }
 
     /**
-     * Browser banner display
+     * Tab metadata used by sidebar + top bar
      */
-    private function displayBrowserBanner() {
-        $html = '
-        <div class="banner-container">
-            <div class="banner-header">
-                <div class="banner-title">COGNITIVE METAMORPHIC CIPHER (CMC) SYSTEM</div>
-                <div class="banner-subtitle">Professional Encryption & Decryption System</div>
-            </div>
-            <div class="banner-info">
-                <div class="info-row">
-                    <span class="info-label">Developers:</span>
-                    <span class="info-value">' . htmlspecialchars($this->developerName) . '</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Student ID:</span>
-                    <span class="info-value">' . htmlspecialchars($this->studentID) . '</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">University:</span>
-                    <span class="info-value">' . htmlspecialchars($this->university) . '</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Version:</span>
-                    <span class="info-value">' . htmlspecialchars($this->projectVersion) . ' (Enhanced Browser Interface)</span>
-                </div>
-            </div>
-        </div>';
+    private function getTabMeta() {
+        return [
+            'encrypt' => [
+                'icon' => '🔒', 'nav' => 'Encrypt', 'hint' => 'Secure a message',
+                'title' => 'Encrypt Message',
+                'sub' => 'Transform plaintext into a metamorphic ciphertext'
+            ],
+            'decrypt' => [
+                'icon' => '🔓', 'nav' => 'Decrypt', 'hint' => 'Recover a message',
+                'title' => 'Decrypt Message',
+                'sub' => 'Verify the password and restore the original text'
+            ],
+            'explanation' => [
+                'icon' => '📖', 'nav' => 'Algorithm', 'hint' => 'How it works',
+                'title' => 'Algorithm Explanation',
+                'sub' => 'Understand cognitive drift and metamorphic block operations'
+            ],
+            'tools' => [
+                'icon' => '🛠️', 'nav' => 'Tools', 'hint' => 'Maintenance',
+                'title' => 'Tools',
+                'sub' => 'Manage stored verification data'
+            ],
+        ];
+    }
+
+    /**
+     * Sidebar (brand + navigation + team card)
+     */
+    private function displayBrowserBanner($mode = 'main', $active = 'encrypt') {
+        $html = '<aside class="sidebar">';
+
+        $html .= '<div class="brand">';
+        $html .= '<svg class="brand-mark" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">'
+              .  '<defs><linearGradient id="bm" x1="0" y1="0" x2="48" y2="48"><stop offset="0" stop-color="#2dd4bf"/><stop offset="1" stop-color="#8b5cf6"/></linearGradient></defs>'
+              .  '<path d="M24 3 42 13.5v21L24 45 6 34.5v-21L24 3Z" stroke="url(#bm)" stroke-width="2.4" fill="rgba(45,212,191,0.08)"/>'
+              .  '<rect x="16" y="21" width="16" height="12" rx="3" fill="url(#bm)"/>'
+              .  '<path d="M19 21v-3.5a5 5 0 0 1 10 0V21" stroke="url(#bm)" stroke-width="2.4" stroke-linecap="round"/>'
+              .  '<circle cx="24" cy="27" r="1.8" fill="#0b1018"/>'
+              .  '</svg>';
+        $html .= '<div><div class="brand-name">Cognitive Metamorphic Cipher</div><div class="brand-sub">CMC System</div></div>';
+        $html .= '</div>';
+
+        $html .= '<div><div class="nav-label">Workspace</div><nav class="nav">';
+        foreach ($this->getTabMeta() as $key => $m) {
+            $inner = '<span class="ico">' . $m['icon'] . '</span>'
+                   . '<span class="nav-text">' . $m['nav'] . '<small>' . $m['hint'] . '</small></span>';
+            if ($mode === 'main') {
+                $cls = 'nav-item' . ($key === $active ? ' active' : '');
+                $html .= '<button type="button" class="' . $cls . '" data-tab="' . $key . '"'
+                       . ' data-title="' . htmlspecialchars($m['title']) . '"'
+                       . ' data-sub="' . htmlspecialchars($m['sub']) . '"'
+                       . ' onclick="switchTab(\'' . $key . '\')">' . $inner . '</button>';
+            } else {
+                $html .= '<a class="nav-item" href="?#' . $key . '">' . $inner . '</a>';
+            }
+        }
+        $html .= '</nav></div>';
+
+        $html .= '<div class="team-card">';
+        $html .= '<div class="team-title">Professional Encryption &amp; Decryption System</div>';
+        $html .= '<div class="team-row"><span>Developers</span><b>' . htmlspecialchars($this->developerName) . '</b></div>';
+        $html .= '<div class="team-row"><span>Student ID</span><b>' . htmlspecialchars($this->studentID) . '</b></div>';
+        $html .= '<div class="team-row"><span>University</span><b>' . htmlspecialchars($this->university) . '</b></div>';
+        $html .= '<div class="team-row"><span>Version</span><b>' . htmlspecialchars($this->projectVersion) . '</b></div>';
+        $html .= '</div>';
+
+        $html .= '</aside>';
         return $html;
     }
 
@@ -637,50 +679,62 @@ class CognitiveMetamorphicCipher {
     }
 
     /**
-     * Browser display analysis
+     * Browser display analysis (right-hand panel of the result view)
      */
     private function displayBrowserAnalysis($result) {
         $html = '<div class="analysis-container">';
-        $html .= '<div class="analysis-header">Detailed Analysis - CMC System</div>';
-        $html .= '<div class="history-section">';
-        $html .= '<div class="section-title">Process History:</div>';
-        $html .= '<div class="history-list">';
-        
-        foreach ($result['history'] as $line) {
-            $html .= '<div class="history-item">' . htmlspecialchars($line) . '</div>';
-        }
-        
-        $html .= '</div></div>';
+        $html .= '<div class="panel-head"><div class="step-badge">&#9638;</div><div><h2>Process Analysis</h2><p>Parameters and the full step-by-step trace of this operation.</p></div></div>';
+
         $html .= '<div class="summary-section">';
-        $html .= '<div class="section-title">Summary Information:</div>';
+        $html .= '<div class="card-title">Summary</div>';
         $html .= '<div class="summary-grid">';
         
         if (isset($result['factors'])) {
-            $html .= '<div class="summary-item"><span class="summary-label">Cognitive Factors:</span> ' . implode(", ", $result['factors']) . '</div>';
+            $html .= '<div class="summary-item"><span class="summary-label">Cognitive Factors</span><span class="summary-val">' . implode(", ", $result['factors']) . '</span></div>';
         }
         if (isset($result['drift'])) {
-            $html .= '<div class="summary-item"><span class="summary-label">Regular Drift:</span> ' . sprintf("%.4f", $result['drift']) . '</div>';
+            $html .= '<div class="summary-item"><span class="summary-label">Regular Drift</span><span class="summary-val">' . sprintf("%.4f", $result['drift']) . '</span></div>';
         }
         if (isset($result['weighted_drift'])) {
-            $html .= '<div class="summary-item"><span class="summary-label">Weighted Drift:</span> ' . sprintf("%.4f", $result['weighted_drift']) . '</div>';
+            $html .= '<div class="summary-item"><span class="summary-label">Weighted Drift</span><span class="summary-val">' . sprintf("%.4f", $result['weighted_drift']) . '</span></div>';
         }
         if (isset($result['initial_key'])) {
-            $html .= '<div class="summary-item"><span class="summary-label">Initial Key:</span> [' . implode(", ", $result['initial_key']) . ']</div>';
+            $html .= '<div class="summary-item"><span class="summary-label">Initial Key</span><span class="summary-val">[' . implode(", ", $result['initial_key']) . ']</span></div>';
         }
         if (isset($result['is_valid'])) {
-            $html .= '<div class="summary-item"><span class="summary-label">Text Validity:</span> <span class="' . ($result['is_valid'] ? 'valid' : 'suspicious') . '">' . ($result['is_valid'] ? '✓ VALID' : '⚠️ SUSPICIOUS') . '</span></div>';
+            $html .= '<div class="summary-item"><span class="summary-label">Text Validity</span><span class="summary-val ' . ($result['is_valid'] ? 'valid' : 'suspicious') . '">' . ($result['is_valid'] ? '✓ VALID' : '⚠️ SUSPICIOUS') . '</span></div>';
         }
         if (isset($result['password_verified'])) {
-            $html .= '<div class="summary-item"><span class="summary-label">Password Verification:</span> <span class="' . ($result['password_verified'] ? 'verified' : 'not-verified') . '">' . ($result['password_verified'] ? '✓ CORRECT' : '✗ INCORRECT') . '</span></div>';
+            $html .= '<div class="summary-item"><span class="summary-label">Password Verification</span><span class="summary-val ' . ($result['password_verified'] ? 'verified' : 'not-verified') . '">' . ($result['password_verified'] ? '✓ CORRECT' : '✗ INCORRECT') . '</span></div>';
         }
         if (isset($result['block_size'])) {
-            $html .= '<div class="summary-item"><span class="summary-label">Block Size:</span> ' . $result['block_size'] . '</div>';
+            $html .= '<div class="summary-item"><span class="summary-label">Block Size</span><span class="summary-val">' . $result['block_size'] . '</span></div>';
         }
         if (isset($result['num_blocks'])) {
-            $html .= '<div class="summary-item"><span class="summary-label">Number of Blocks:</span> ' . $result['num_blocks'] . '</div>';
+            $html .= '<div class="summary-item"><span class="summary-label">Number of Blocks</span><span class="summary-val">' . $result['num_blocks'] . '</span></div>';
         }
         
-        $html .= '</div></div></div>';
+        $html .= '</div></div>';
+
+        $html .= '<div class="history-section">';
+        $html .= '<div class="card-title">Process History</div>';
+        $html .= '<div class="history-list">';
+        foreach ($result['history'] as $line) {
+            $cls = 'history-item';
+            if (strpos($line, '===') === 0) {
+                $cls .= ' h';
+            } elseif (strpos($line, '---') === 0) {
+                $cls .= ' sub';
+            } elseif (strpos($line, '    ') === 0) {
+                $cls .= ' op';
+            } elseif (strpos($line, '✓') === 0) {
+                $cls .= ' ok';
+            }
+            $html .= '<div class="' . $cls . '">' . htmlspecialchars($line) . '</div>';
+        }
+        $html .= '</div></div>';
+
+        $html .= '</div>';
         return $html;
     }
 
@@ -745,20 +799,23 @@ class CognitiveMetamorphicCipher {
     }
 
     /**
-     * Browser explanation
+     * Browser explanation (card grid)
      */
     private function displayBrowserExplanation() {
-        $html = '<div class="explanation-container">';
-        $html .= '<div class="explanation-header">COGNITIVE METAMORPHIC CIPHER - EXPLANATION</div>';
-        
-        $html .= '<div class="developer-info">';
-        $html .= '<div class="info-item"><strong>Developed By:</strong> ' . htmlspecialchars($this->developerName) . '</div>';
-        $html .= '<div class="info-item"><strong>Student ID:</strong> ' . htmlspecialchars($this->studentID) . '</div>';
-        $html .= '<div class="info-item"><strong>Version:</strong> ' . htmlspecialchars($this->projectVersion) . '</div>';
+        $html = '<div class="explain-grid">';
+
+        // Developer card
+        $html .= '<div class="card developer-info">';
+        $html .= '<div class="card-title">Project</div>';
+        $html .= '<div class="info-item"><span>Developed By</span><b>' . htmlspecialchars($this->developerName) . '</b></div>';
+        $html .= '<div class="info-item"><span>Student ID</span><b>' . htmlspecialchars($this->studentID) . '</b></div>';
+        $html .= '<div class="info-item"><span>University</span><b>' . htmlspecialchars($this->university) . '</b></div>';
+        $html .= '<div class="info-item"><span>Version</span><b>' . htmlspecialchars($this->projectVersion) . '</b></div>';
         $html .= '</div>';
-        
-        $html .= '<div class="features-section">';
-        $html .= '<div class="section-title">Improved Features:</div>';
+
+        // Features
+        $html .= '<div class="card features-section">';
+        $html .= '<div class="card-title">Improved Features</div>';
         $html .= '<ul class="features-list">';
         $html .= '<li>Enhanced Password Verification System</li>';
         $html .= '<li>Professional Browser Interface</li>';
@@ -767,29 +824,33 @@ class CognitiveMetamorphicCipher {
         $html .= '<li>Clear Error Messages</li>';
         $html .= '</ul>';
         $html .= '</div>';
-        
-        $html .= '<div class="usage-section">';
-        $html .= '<div class="section-title">How to Use:</div>';
-        $html .= '<div class="usage-subsection">';
-        $html .= '<div class="subsection-title">1. During Encryption:</div>';
-        $html .= '<ul>';
-        $html .= '<li>Enter plaintext, password, 3 cognitive factors, block size</li>';
-        $html .= '<li>System stores verification data automatically</li>';
-        $html .= '</ul>';
+
+        // How it works
+        $html .= '<div class="card wide">';
+        $html .= '<div class="card-title">How the cipher works</div>';
+        $html .= '<div class="algo-steps">';
+        $html .= '<div class="algo-step"><b>1 &middot; Cognitive drift</b><p>The 3 cognitive factors give a regular drift (average) and a weighted drift that emphasises higher values.</p></div>';
+        $html .= '<div class="algo-step"><b>2 &middot; Drifted key</b><p>Every password byte is shifted using the weighted drift, so the same password produces a different key for different factors.</p></div>';
+        $html .= '<div class="algo-step"><b>3 &middot; Block operations</b><p>Data is split into blocks. Operations rotate XOR, ADD and SUB block by block.</p></div>';
+        $html .= '<div class="algo-step"><b>4 &middot; Metamorphic key</b><p>After each block the key mutates using that block sum, so every block is encrypted with a new key.</p></div>';
         $html .= '</div>';
-        
-        $html .= '<div class="usage-subsection">';
-        $html .= '<div class="subsection-title">2. During Decryption:</div>';
-        $html .= '<ul>';
-        $html .= '<li>Enter HEX string, EXACT password, EXACT factors, EXACT block size</li>';
+        $html .= '</div>';
+
+        // Usage
+        $html .= '<div class="card usage-section">';
+        $html .= '<div class="card-title">How to use</div>';
+        $html .= '<div class="usage-subsection"><div class="subsection-title">1. During Encryption</div>';
+        $html .= '<ul><li>Enter plaintext, password, 3 cognitive factors, block size</li>';
+        $html .= '<li>System stores verification data automatically</li></ul></div>';
+        $html .= '<div class="usage-subsection"><div class="subsection-title">2. During Decryption</div>';
+        $html .= '<ul><li>Enter HEX string, EXACT password, EXACT factors, EXACT block size</li>';
         $html .= '<li>System verifies password automatically</li>';
-        $html .= '<li>Wrong password shows clear error message</li>';
-        $html .= '</ul>';
+        $html .= '<li>Wrong password shows clear error message</li></ul></div>';
         $html .= '</div>';
-        $html .= '</div>';
-        
-        $html .= '<div class="important-notes">';
-        $html .= '<div class="section-title">Important Notes:</div>';
+
+        // Notes
+        $html .= '<div class="card important-notes">';
+        $html .= '<div class="card-title">Important Notes</div>';
         $html .= '<ul>';
         $html .= '<li>Password must match EXACTLY (case-sensitive)</li>';
         $html .= '<li>Cognitive factors must be EXACTLY 3 values</li>';
@@ -797,7 +858,7 @@ class CognitiveMetamorphicCipher {
         $html .= '<li>All inputs are automatically trimmed</li>';
         $html .= '</ul>';
         $html .= '</div>';
-        
+
         $html .= '</div>';
         return $html;
     }
@@ -841,7 +902,7 @@ class CognitiveMetamorphicCipher {
                 $result = $this->encrypt($plaintext, $password, $factors, $blockSize);
                 
                 if (isset($result['error'])) {
-                    return $this->displayBrowserInterface($result['error'], 'error');
+                    return $this->displayBrowserInterface($result['error'], 'error', 'encrypt');
                 }
                 
                 return $this->displayBrowserResult($result, 'encrypt');
@@ -855,20 +916,20 @@ class CognitiveMetamorphicCipher {
                 try {
                     $ciphertext = hex2bin($hexString);
                     if ($ciphertext === false) {
-                        return $this->displayBrowserInterface('Invalid hex string!', 'error');
+                        return $this->displayBrowserInterface('Invalid hex string!', 'error', 'decrypt');
                     }
                 } catch (Exception $e) {
-                    return $this->displayBrowserInterface('Invalid hex string format!', 'error');
+                    return $this->displayBrowserInterface('Invalid hex string format!', 'error', 'decrypt');
                 }
                 
                 $result = $this->decrypt($ciphertext, $password, $factors, $blockSize, $hexString);
                 
                 if (isset($result['error'])) {
-                    return $this->displayBrowserInterface($result['error'], 'error');
+                    return $this->displayBrowserInterface($result['error'], 'error', 'decrypt');
                 }
                 
                 if (!$result['password_verified']) {
-                    return $this->displayBrowserInterface('Password verification failed! Please enter the exact password used during encryption.', 'error');
+                    return $this->displayBrowserInterface('Password verification failed! Please enter the exact password used during encryption.', 'error', 'decrypt');
                 }
                 
                 return $this->displayBrowserResult($result, 'decrypt');
@@ -897,14 +958,14 @@ class CognitiveMetamorphicCipher {
                 $saveResult = $this->saveCiphertextDetailsBrowser($result, $plaintext, $password);
                 
                 if ($saveResult['success']) {
-                    return $this->displayBrowserInterface($saveResult['message'], 'success');
+                    return $this->displayBrowserInterface($saveResult['message'], 'success', 'encrypt');
                 } else {
-                    return $this->displayBrowserInterface($saveResult['message'], 'error');
+                    return $this->displayBrowserInterface($saveResult['message'], 'error', 'encrypt');
                 }
                 
             case 'clear_verification':
                 $message = $this->clearVerificationFile();
-                return $this->displayBrowserInterface($message, 'info');
+                return $this->displayBrowserInterface($message, 'info', 'tools');
                 
             case 'explanation':
                 return $this->displayBrowserExplanation();
@@ -914,126 +975,216 @@ class CognitiveMetamorphicCipher {
     }
 
     /**
-     * Display browser interface
+     * Display main browser interface (full-screen workspace)
      */
-    private function displayBrowserInterface($message = '', $messageType = '') {
-        $html = $this->getBrowserHeader();
-        
+    private function displayBrowserInterface($message = '', $messageType = '', $active = 'encrypt') {
+        $html = $this->getBrowserHeader('main', $active);
+
         if ($message) {
-            $html .= '<div class="message ' . $messageType . '">' . htmlspecialchars($message) . '</div>';
+            $icons = ['success' => '✓', 'error' => '⚠', 'info' => 'ℹ'];
+            $icon = isset($icons[$messageType]) ? $icons[$messageType] : 'ℹ';
+            $html .= '<div class="toast message ' . htmlspecialchars($messageType) . '">'
+                   . '<span class="toast-icon">' . $icon . '</span>'
+                   . '<span class="toast-text">' . htmlspecialchars($message) . '</span>'
+                   . '<button type="button" class="toast-close" onclick="this.parentNode.remove()">&times;</button>'
+                   . '</div>';
         }
-        
-        $html .= '<div class="main-content">';
-        $html .= '<div class="tabs">';
-        $html .= '<button class="tab-button active" onclick="switchTab(\'encrypt\')">🔒 Encrypt Message</button>';
-        $html .= '<button class="tab-button" onclick="switchTab(\'decrypt\')">🔓 Decrypt Message</button>';
-        $html .= '<button class="tab-button" onclick="switchTab(\'explanation\')">📖 Algorithm Explanation</button>';
-        $html .= '<button class="tab-button" onclick="switchTab(\'tools\')">🛠️ Tools</button>';
-        $html .= '</div>';
-        
-        $html .= '<div class="tab-content">';
-        
-        // Encryption Tab
-        $html .= '<div id="encrypt-tab" class="tab-pane active">';
-        $html .= '<form method="POST" class="cipher-form">';
+
+        $a = function($k) use ($active) { return $active === $k ? ' active' : ''; };
+
+        // ================= ENCRYPT =================
+        $html .= '<div id="encrypt-tab" class="tab-pane' . $a('encrypt') . '">';
+        $html .= '<div class="workspace">';
+
+        $html .= '<section class="panel accent">';
+        $html .= '<div class="panel-head"><div class="step-badge">01</div><div><h2>Encrypt a message</h2><p>Remember your password, factors and block size. You need them exactly to decrypt later.</p></div></div>';
+        $html .= '<form method="POST" class="cipher-form" autocomplete="off">';
         $html .= '<input type="hidden" name="action" value="encrypt">';
-        $html .= '<div class="form-group">';
-        $html .= '<label for="plaintext">Text to Encrypt:</label>';
-        $html .= '<textarea id="plaintext" name="plaintext" rows="3" required placeholder="Enter your secret message here..."></textarea>';
+        $html .= '<div class="field"><label for="plaintext">Text to encrypt</label>';
+        $html .= '<textarea id="plaintext" name="plaintext" rows="3" required placeholder="Enter your secret message here..."></textarea></div>';
+        $html .= '<div class="field"><label for="password">Password <em>case-sensitive</em></label>';
+        $html .= '<div class="input-wrap"><input type="password" id="password" name="password" required placeholder="Enter a strong password">';
+        $html .= '<button type="button" class="eye" onclick="togglePw(this)">Show</button></div></div>';
+        $html .= '<div class="row-2">';
+        $html .= '<div class="field"><label for="factors">Cognitive factors <em>3 values, 0 to 1</em></label>';
+        $html .= '<input type="text" id="factors" name="factors" required placeholder="0.25,0.50,0.75" oninput="updateLive()">';
+        $html .= '<small class="hint">Memory, Adaptability, Attention</small></div>';
+        $html .= '<div class="field"><label for="block_size">Block size <em>integer &ge; 1</em></label>';
+        $html .= '<input type="number" id="block_size" name="block_size" min="1" value="4" required></div>';
         $html .= '</div>';
-        $html .= '<div class="form-group">';
-        $html .= '<label for="password">Password (case-sensitive):</label>';
-        $html .= '<input type="password" id="password" name="password" required placeholder="Enter a strong password">';
-        $html .= '</div>';
-        $html .= '<div class="form-group">';
-        $html .= '<label for="factors">Cognitive Factors (3 values, 0-1, e.g., 0.25,0.50,0.75):</label>';
-        $html .= '<input type="text" id="factors" name="factors" required placeholder="Memory, Adaptibility, Attention">';
-        $html .= '<small class="form-help">Enter exactly 3 comma-separated values between 0 and 1</small>';
-        $html .= '</div>';
-        $html .= '<div class="form-group">';
-        $html .= '<label for="block_size">Block Size (integer ≥ 1):</label>';
-        $html .= '<input type="number" id="block_size" name="block_size" min="1" value="4" required>';
-        $html .= '</div>';
-        $html .= '<button type="submit" class="submit-btn encrypt-btn">🔒 Encrypt Message</button>';
+        $html .= '<button type="submit" class="btn btn-block btn-encrypt">🔒 Encrypt Message</button>';
         $html .= '</form>';
+        $html .= '</section>';
+
+        $html .= '<aside class="panel side">';
+        $html .= '<div class="card">';
+        $html .= '<div class="card-title">Live drift preview <span id="live-status" class="pill">0 / 3 factors</span></div>';
+        $names = ['Memory', 'Adaptability', 'Attention'];
+        foreach ($names as $i => $n) {
+            $html .= '<div class="meter-row"><span class="m-name">Factor ' . ($i + 1) . ' &middot; ' . $n . '</span><span class="m-val" id="val-' . $i . '">&mdash;</span>';
+            $html .= '<div class="meter"><i id="bar-' . $i . '"></i></div></div>';
+        }
+        $html .= '<div class="drift-grid">';
+        $html .= '<div class="stat"><label>Drift</label><div class="v" id="live-drift">&mdash;</div></div>';
+        $html .= '<div class="stat"><label>Weighted drift</label><div class="v" id="live-wdrift">&mdash;</div></div>';
         $html .= '</div>';
-        
-        // Decryption Tab
-        $html .= '<div id="decrypt-tab" class="tab-pane">';
-        $html .= '<form method="POST" class="cipher-form">';
+        $html .= '</div>';
+
+        $html .= '<div class="card">';
+        $html .= '<div class="card-title">Encryption pipeline</div>';
+        $html .= '<div class="flow">';
+        $flowE = [
+            ['Parse input', 'Plaintext and password become ASCII bytes.'],
+            ['Cognitive drift', 'Weighted drift is computed from the 3 factors.'],
+            ['Drifted key', 'Password bytes are shifted by the weighted drift.'],
+            ['Metamorphic blocks', 'XOR / ADD / SUB cycle, key mutates per block.'],
+            ['HEX ciphertext', 'Output is produced and a verification code stored.'],
+        ];
+        foreach ($flowE as $i => $f) {
+            $html .= '<div class="flow-step" style="--i:' . $i . '"><div class="flow-num">' . ($i + 1) . '</div><div><b>' . $f[0] . '</b><p>' . $f[1] . '</p></div></div>';
+        }
+        $html .= '</div></div>';
+        $html .= '</aside>';
+
+        $html .= '</div></div>';
+
+        // ================= DECRYPT =================
+        $html .= '<div id="decrypt-tab" class="tab-pane' . $a('decrypt') . '">';
+        $html .= '<div class="workspace">';
+
+        $html .= '<section class="panel accent">';
+        $html .= '<div class="panel-head"><div class="step-badge">02</div><div><h2>Decrypt a message</h2><p>Provide the exact HEX string and the same parameters used during encryption.</p></div></div>';
+        $html .= '<form method="POST" class="cipher-form" autocomplete="off">';
         $html .= '<input type="hidden" name="action" value="decrypt">';
-        $html .= '<div class="form-group">';
-        $html .= '<label for="hex_string">HEX String:</label>';
-        $html .= '<textarea id="hex_string" name="hex_string" rows="2" required placeholder="Enter the hex ciphertext..."></textarea>';
+        $html .= '<div class="field"><label for="hex_string">HEX string</label>';
+        $html .= '<textarea id="hex_string" name="hex_string" rows="3" required placeholder="Enter the hex ciphertext..."></textarea></div>';
+        $html .= '<div class="field"><label for="password_decrypt">Password <em>exact, case-sensitive</em></label>';
+        $html .= '<div class="input-wrap"><input type="password" id="password_decrypt" name="password" required placeholder="Enter the exact password">';
+        $html .= '<button type="button" class="eye" onclick="togglePw(this)">Show</button></div></div>';
+        $html .= '<div class="row-2">';
+        $html .= '<div class="field"><label for="factors_decrypt">Cognitive factors <em>exact 3 values</em></label>';
+        $html .= '<input type="text" id="factors_decrypt" name="factors" required placeholder="Must match encryption exactly"></div>';
+        $html .= '<div class="field"><label for="block_size_decrypt">Block size <em>must match</em></label>';
+        $html .= '<input type="number" id="block_size_decrypt" name="block_size" min="1" required></div>';
         $html .= '</div>';
-        $html .= '<div class="form-group">';
-        $html .= '<label for="password_decrypt">Password (EXACT, case-sensitive):</label>';
-        $html .= '<input type="password" id="password_decrypt" name="password" required placeholder="Enter the exact password">';
-        $html .= '</div>';
-        $html .= '<div class="form-group">';
-        $html .= '<label for="factors_decrypt">Cognitive Factors (EXACT 3 values):</label>';
-        $html .= '<input type="text" id="factors_decrypt" name="factors" required placeholder="Must match encryption exactly">';
-        $html .= '</div>';
-        $html .= '<div class="form-group">';
-        $html .= '<label for="block_size_decrypt">Block Size (MUST match encryption):</label>';
-        $html .= '<input type="number" id="block_size_decrypt" name="block_size" min="1" required>';
-        $html .= '</div>';
-        $html .= '<button type="submit" class="submit-btn decrypt-btn">🔓 Decrypt Message</button>';
+        $html .= '<button type="submit" class="btn btn-block btn-decrypt">🔓 Decrypt Message</button>';
         $html .= '</form>';
+        $html .= '</section>';
+
+        $html .= '<aside class="panel side">';
+        $html .= '<div class="card">';
+        $html .= '<div class="card-title">Must match exactly</div>';
+        $html .= '<ul class="check-list">';
+        $html .= '<li><span>✓</span> HEX ciphertext from the encryption result</li>';
+        $html .= '<li><span>✓</span> Password, including upper and lower case</li>';
+        $html .= '<li><span>✓</span> The same 3 cognitive factors</li>';
+        $html .= '<li><span>✓</span> The same block size</li>';
+        $html .= '</ul>';
         $html .= '</div>';
-        
-        // Explanation Tab
-        $html .= '<div id="explanation-tab" class="tab-pane">';
+
+        $html .= '<div class="card">';
+        $html .= '<div class="card-title">Decryption pipeline</div>';
+        $html .= '<div class="flow">';
+        $flowD = [
+            ['Parse HEX', 'The HEX string is converted back to bytes.'],
+            ['Verify password', 'A verification code is compared with the stored one.'],
+            ['Rebuild key', 'The same drifted key is regenerated.'],
+            ['Reverse blocks', 'Each block operation is reversed in order.'],
+            ['Recover text', 'Padding is removed and plaintext is restored.'],
+        ];
+        foreach ($flowD as $i => $f) {
+            $html .= '<div class="flow-step" style="--i:' . $i . '"><div class="flow-num">' . ($i + 1) . '</div><div><b>' . $f[0] . '</b><p>' . $f[1] . '</p></div></div>';
+        }
+        $html .= '</div></div>';
+        $html .= '</aside>';
+
+        $html .= '</div></div>';
+
+        // ================= EXPLANATION =================
+        $html .= '<div id="explanation-tab" class="tab-pane' . $a('explanation') . '">';
         $html .= $this->displayBrowserExplanation();
         $html .= '</div>';
-        
-        // Tools Tab
-        $html .= '<div id="tools-tab" class="tab-pane">';
-        $html .= '<div class="tools-container">';
-        $html .= '<div class="tool-card">';
-        $html .= '<h3>🛠️ Clear Verification Data</h3>';
-        $html .= '<p>Clear all stored password verification data.</p>';
+
+        // ================= TOOLS =================
+        $html .= '<div id="tools-tab" class="tab-pane' . $a('tools') . '">';
+        $html .= '<div class="explain-grid">';
+        $html .= '<div class="card tool-card">';
+        $html .= '<div class="card-title">🛠️ Clear verification data</div>';
+        $html .= '<p>Clear all stored password verification data. After clearing, previously encrypted messages can no longer be verified or decrypted.</p>';
+        $html .= '<div class="file-chip">' . htmlspecialchars($this->passwordVerificationFile) . '</div>';
         $html .= '<form method="POST" class="tool-form">';
         $html .= '<input type="hidden" name="action" value="clear_verification">';
-        $html .= '<button type="submit" class="tool-btn warning-btn" onclick="return confirm(\'Are you sure you want to clear ALL verification data?\')">🗑️ Clear Verification File</button>';
+        $html .= '<button type="submit" class="btn btn-danger" onclick="return confirm(\'Are you sure you want to clear ALL verification data?\')">🗑️ Clear Verification File</button>';
         $html .= '</form>';
         $html .= '</div>';
         $html .= '</div>';
         $html .= '</div>';
-        
-        $html .= '</div></div>';
+
         $html .= $this->getBrowserFooter();
-        
+
         return $html;
     }
 
     /**
-     * Display browser result
+     * Display result view (split: result left, analysis right)
      */
     private function displayBrowserResult($result, $type) {
-        $html = $this->getBrowserHeader();
-        
-        $html .= '<div class="result-container">';
-        
-        if ($type === 'encrypt') {
-            $html .= '<div class="result-header success">';
-            $html .= '<h2>🔒 Encryption Complete!</h2>';
-            $html .= '</div>';
-            
-            $html .= '<div class="result-details">';
-            $html .= '<div class="result-card">';
-            $html .= '<h3>Encryption Results</h3>';
-            $html .= '<div class="result-item"><label>Original Text:</label> <span class="value">' . htmlspecialchars($result['plaintext']) . '</span></div>';
-            $html .= '<div class="result-item"><label>Block Size:</label> <span class="value">' . $result['block_size'] . '</span></div>';
-            $html .= '<div class="result-item"><label>Weighted Drift:</label> <span class="value">' . sprintf("%.4f", $result['weighted_drift']) . '</span></div>';
-            $html .= '<div class="result-item"><label>Number of Blocks:</label> <span class="value">' . $result['num_blocks'] . '</span></div>';
-            $html .= '<div class="result-item"><label>Ciphertext (HEX):</label> <span class="value hex-string">' . $result['hex_string'] . '</span></div>';
-            $html .= '</div>';
-            
-            $html .= '<div class="result-actions">';
-            $html .= '<button onclick="copyToClipboard(\'' . $result['hex_string'] . '\')" class="action-btn copy-btn">📋 Copy HEX</button>';
-            
-            $html .= '<form method="POST" style="display: inline;">';
+        $isEnc = ($type === 'encrypt');
+
+        if ($isEnc) {
+            $title = 'Encryption Result';
+            $sub = 'Your message was transformed using weighted cognitive drift';
+        } else {
+            $title = 'Decryption Result';
+            $sub = $result['is_valid'] ? 'Password verified and original text recovered' : 'Decryption finished, but the text looks suspicious';
+        }
+
+        $html = $this->getBrowserHeader('result', '', $title, $sub);
+
+        $html .= '<div class="workspace">';
+        $html .= '<section class="panel accent">';
+
+        // Status banner
+        if ($isEnc) {
+            $html .= '<div class="status success"><div class="status-icon">🔒</div><div><h2>Encryption Complete!</h2><p>Ciphertext generated and verification code stored.</p></div></div>';
+        } else {
+            $ok = $result['is_valid'];
+            $html .= '<div class="status ' . ($ok ? 'success' : 'warning') . '"><div class="status-icon">' . ($ok ? '🔓' : '⚠️') . '</div><div><h2>' . ($ok ? 'Decryption Successful!' : 'Decryption Warning') . '</h2><p>' . ($ok ? 'The original message has been recovered.' : 'Please double check the cognitive factors and block size.') . '</p></div></div>';
+        }
+
+        // Stats
+        $html .= '<div class="stat-grid">';
+        $html .= '<div class="stat"><label>Block Size</label><div class="v">' . $result['block_size'] . '</div></div>';
+        $html .= '<div class="stat"><label>Blocks</label><div class="v">' . $result['num_blocks'] . '</div></div>';
+        $html .= '<div class="stat"><label>Weighted Drift</label><div class="v">' . sprintf("%.4f", $result['weighted_drift']) . '</div></div>';
+        if ($isEnc) {
+            $html .= '<div class="stat"><label>Regular Drift</label><div class="v">' . sprintf("%.4f", $result['drift']) . '</div></div>';
+        } else {
+            $html .= '<div class="stat"><label>Password</label><div class="v ' . ($result['password_verified'] ? 'verified' : 'not-verified') . '">' . ($result['password_verified'] ? '✓ Verified' : '✗ Failed') . '</div></div>';
+        }
+        $html .= '</div>';
+
+        // Outputs
+        if ($isEnc) {
+            $html .= '<div class="out"><div class="out-head"><span>Original text</span></div>';
+            $html .= '<div class="out-box plain">' . htmlspecialchars($result['plaintext']) . '</div></div>';
+
+            $html .= '<div class="out"><div class="out-head"><span>Ciphertext (HEX)</span>';
+            $html .= '<button type="button" class="copy-mini" data-copy="' . htmlspecialchars($result['hex_string'], ENT_QUOTES) . '" onclick="copyFrom(this)">📋 Copy HEX</button></div>';
+            $html .= '<div class="out-box hex-string">' . htmlspecialchars($result['hex_string']) . '</div></div>';
+        } else {
+            $html .= '<div class="out"><div class="out-head"><span>Ciphertext (HEX)</span></div>';
+            $html .= '<div class="out-box hex-string">' . htmlspecialchars($result['hex_string']) . '</div></div>';
+
+            $html .= '<div class="out"><div class="out-head"><span>Recovered text <b class="tag ' . ($result['is_valid'] ? 'valid' : 'suspicious') . '">' . ($result['is_valid'] ? '✓ VALID' : '⚠️ SUSPICIOUS') . '</b></span>';
+            $html .= '<button type="button" class="copy-mini" data-copy="' . htmlspecialchars($result['plaintext'], ENT_QUOTES) . '" onclick="copyFrom(this)">📋 Copy Text</button></div>';
+            $html .= '<div class="out-box recovered-text">' . htmlspecialchars($result['plaintext']) . '</div></div>';
+        }
+
+        // Actions
+        $html .= '<div class="result-actions">';
+        if ($isEnc) {
+            $html .= '<form method="POST">';
             $html .= '<input type="hidden" name="action" value="save">';
             $html .= '<input type="hidden" name="plaintext" value="' . htmlspecialchars($result['plaintext']) . '">';
             $html .= '<input type="hidden" name="password" value="' . htmlspecialchars($result['password']) . '">';
@@ -1044,716 +1195,476 @@ class CognitiveMetamorphicCipher {
             $html .= '<input type="hidden" name="block_size" value="' . $result['block_size'] . '">';
             $html .= '<input type="hidden" name="num_blocks" value="' . $result['num_blocks'] . '">';
             $html .= '<input type="hidden" name="initial_key" value="' . implode(',', $result['initial_key']) . '">';
-            $html .= '<button type="submit" class="action-btn save-btn">💾 Save Details</button>';
+            $html .= '<button type="submit" class="btn btn-save">💾 Save Details</button>';
             $html .= '</form>';
-            
-            $html .= '<button onclick="showAnalysis()" class="action-btn analysis-btn">📊 Show Analysis</button>';
-            $html .= '</div>';
-            
-            $html .= '<div id="analysis-section" style="display: none; margin-top: 20px;">';
-            $html .= $this->displayBrowserAnalysis($result);
-            $html .= '</div>';
-        } else {
-            $html .= '<div class="result-header ' . ($result['is_valid'] ? 'success' : 'warning') . '">';
-            $html .= '<h2>' . ($result['is_valid'] ? '🔓 Decryption Successful!' : '⚠️ Decryption Warning') . '</h2>';
-            $html .= '</div>';
-            
-            $html .= '<div class="result-details">';
-            $html .= '<div class="result-card">';
-            $html .= '<h3>Decryption Results</h3>';
-            $html .= '<div class="result-item"><label>Ciphertext (HEX):</label> <span class="value hex-string">' . $result['hex_string'] . '</span></div>';
-            $html .= '<div class="result-item"><label>Block Size:</label> <span class="value">' . $result['block_size'] . '</span></div>';
-            $html .= '<div class="result-item"><label>Weighted Drift:</label> <span class="value">' . sprintf("%.4f", $result['weighted_drift']) . '</span></div>';
-            $html .= '<div class="result-item"><label>Password Verified:</label> <span class="value ' . ($result['password_verified'] ? 'verified' : 'not-verified') . '">' . ($result['password_verified'] ? '✓ YES' : '✗ NO') . '</span></div>';
-            $html .= '<div class="result-item"><label>Recovered Text:</label> <span class="value recovered-text">' . htmlspecialchars($result['plaintext']) . '</span></div>';
-            $html .= '<div class="result-item"><label>Text Validity:</label> <span class="value ' . ($result['is_valid'] ? 'valid' : 'suspicious') . '">' . ($result['is_valid'] ? '✓ VALID' : '⚠️ SUSPICIOUS') . '</span></div>';
-            $html .= '</div>';
-            
-            $html .= '<div class="result-actions">';
-            $html .= '<button onclick="copyToClipboard(\'' . htmlspecialchars($result['plaintext']) . '\')" class="action-btn copy-btn">📋 Copy Text</button>';
-            $html .= '<button onclick="showAnalysis()" class="action-btn analysis-btn">📊 Show Analysis</button>';
-            $html .= '</div>';
-            
-            $html .= '<div id="analysis-section" style="display: none; margin-top: 20px;">';
-            $html .= $this->displayBrowserAnalysis($result);
-            $html .= '</div>';
         }
-        
-        $html .= '<div class="navigation">';
-        $html .= '<a href="?" class="nav-btn">← Back to Main</a>';
+        $html .= '<a href="?" class="btn btn-ghost">&larr; Back to Main</a>';
         $html .= '</div>';
-        
+
+        $html .= '</section>';
+
+        $html .= '<aside class="panel">';
+        $html .= $this->displayBrowserAnalysis($result);
+        $html .= '</aside>';
+
         $html .= '</div>';
+
         $html .= $this->getBrowserFooter();
-        
+
         return $html;
     }
 
     /**
-     * Get browser header with CSS - PROFESSIONAL ANIMATED THEME
+     * Page head + app shell opening (sidebar, top bar). Leaves <div class="content"> open.
      */
-    private function getBrowserHeader() {
-        $html = '<!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Cognitive Metamorphic Cipher System</title>
-            <link rel="preconnect" href="https://fonts.googleapis.com">
-            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-            <style>
-                :root {
-                    --bg-0: #070b14;
-                    --bg-1: #0d1424;
-                    --surface: rgba(255, 255, 255, 0.045);
-                    --surface-2: rgba(255, 255, 255, 0.07);
-                    --border: rgba(148, 163, 184, 0.18);
-                    --text: #e6edf7;
-                    --muted: #94a3b8;
-                    --primary: #6366f1;
-                    --primary-2: #22d3ee;
-                    --accent: #f5b942;
-                    --success: #10b981;
-                    --danger: #ef4444;
-                    --warning: #f59e0b;
-                    --info: #38bdf8;
-                    --radius: 16px;
-                    --mono: "JetBrains Mono", "Courier New", monospace;
-                }
+    private function getBrowserHeader($mode = 'main', $active = 'encrypt', $title = null, $sub = null) {
+        if ($title === null || $sub === null) {
+            $meta = $this->getTabMeta();
+            $key = isset($meta[$active]) ? $active : 'encrypt';
+            $title = $meta[$key]['title'];
+            $sub = $meta[$key]['sub'];
+        }
 
-                * { margin: 0; padding: 0; box-sizing: border-box; }
+        $html = <<<'CMCHEAD'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cognitive Metamorphic Cipher System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+    --bg:#070a12;
+    --panel:rgba(16,23,36,.72);
+    --card:rgba(255,255,255,.035);
+    --line:rgba(148,163,184,.14);
+    --text:#e8eef8;
+    --muted:#8b9ab1;
+    --teal:#2dd4bf;
+    --blue:#3b82f6;
+    --violet:#8b5cf6;
+    --amber:#fbbf24;
+    --green:#34d399;
+    --red:#f87171;
+    --mono:"JetBrains Mono","Courier New",monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{
+    font-family:"Inter","Segoe UI",Tahoma,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    overflow:hidden;
+    line-height:1.5;
+}
 
-                html { scroll-behavior: smooth; }
+/* ===== Animated background ===== */
+body::before{
+    content:"";position:fixed;inset:-10%;z-index:0;pointer-events:none;
+    background:
+        radial-gradient(600px 420px at 12% 8%,rgba(45,212,191,.16),transparent 60%),
+        radial-gradient(720px 520px at 92% 92%,rgba(139,92,246,.17),transparent 60%),
+        radial-gradient(520px 420px at 72% 8%,rgba(59,130,246,.12),transparent 60%);
+    animation:aurora 22s ease-in-out infinite alternate;
+}
+body::after{
+    content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+    background-size:48px 48px;
+    -webkit-mask-image:radial-gradient(circle at 55% 35%,#000 15%,transparent 75%);
+    mask-image:radial-gradient(circle at 55% 35%,#000 15%,transparent 75%);
+    animation:gridDrift 30s linear infinite;
+}
+@keyframes aurora{0%{transform:translate3d(0,0,0) scale(1)}100%{transform:translate3d(-3%,2%,0) scale(1.1)}}
+@keyframes gridDrift{from{background-position:0 0,0 0}to{background-position:48px 48px,48px 48px}}
 
-                body {
-                    font-family: "Inter", "Segoe UI", Tahoma, sans-serif;
-                    background: var(--bg-0);
-                    color: var(--text);
-                    min-height: 100vh;
-                    padding: 24px;
-                    position: relative;
-                    overflow-x: hidden;
-                    line-height: 1.55;
-                }
+/* ===== App shell ===== */
+.app{position:relative;z-index:1;display:grid;grid-template-columns:276px 1fr;height:100vh;height:100dvh}
 
-                /* ===== Animated background ===== */
-                body::before,
-                body::after {
-                    content: "";
-                    position: fixed;
-                    width: 620px;
-                    height: 620px;
-                    border-radius: 50%;
-                    filter: blur(110px);
-                    opacity: 0.35;
-                    z-index: 0;
-                    pointer-events: none;
-                }
-                body::before {
-                    background: var(--primary);
-                    top: -180px;
-                    left: -160px;
-                    animation: floatA 18s ease-in-out infinite alternate;
-                }
-                body::after {
-                    background: var(--primary-2);
-                    bottom: -200px;
-                    right: -160px;
-                    animation: floatB 22s ease-in-out infinite alternate;
-                }
-                @keyframes floatA {
-                    0%   { transform: translate(0, 0) scale(1); }
-                    100% { transform: translate(180px, 120px) scale(1.25); }
-                }
-                @keyframes floatB {
-                    0%   { transform: translate(0, 0) scale(1.1); }
-                    100% { transform: translate(-200px, -100px) scale(0.9); }
-                }
+/* ===== Sidebar ===== */
+.sidebar{
+    display:flex;flex-direction:column;gap:24px;padding:22px 16px;
+    background:linear-gradient(180deg,rgba(12,18,30,.94),rgba(8,12,21,.96));
+    border-right:1px solid var(--line);overflow-y:auto;
+    animation:slideInLeft .7s cubic-bezier(.2,.8,.2,1) both;
+}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-24px)}to{opacity:1;transform:none}}
+.brand{display:flex;gap:12px;align-items:center;padding:4px 8px}
+.brand-mark{width:46px;height:46px;flex:none;filter:drop-shadow(0 0 14px rgba(45,212,191,.35));animation:markFloat 5s ease-in-out infinite}
+@keyframes markFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.brand-name{font-weight:800;font-size:.98em;line-height:1.2}
+.brand-sub{font-size:.7em;color:var(--teal);letter-spacing:2.4px;text-transform:uppercase;margin-top:3px;font-weight:600}
+.nav-label{font-size:.7em;letter-spacing:2px;text-transform:uppercase;color:#5d6c85;font-weight:700;padding:0 10px;margin-bottom:10px}
+.nav{display:flex;flex-direction:column;gap:6px}
+.nav-item{
+    position:relative;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;
+    border:1px solid transparent;background:transparent;color:var(--muted);font:inherit;font-weight:600;font-size:.94em;
+    cursor:pointer;text-decoration:none;text-align:left;overflow:hidden;transition:all .3s ease;
+}
+.nav-item .ico{width:36px;height:36px;display:grid;place-items:center;border-radius:11px;background:rgba(255,255,255,.05);font-size:1.05em;transition:all .3s ease;flex:none}
+.nav-text small{display:block;font-weight:400;font-size:.76em;color:#6b7b95;margin-top:1px}
+.nav-item::before{
+    content:"";position:absolute;left:0;top:22%;bottom:22%;width:3px;border-radius:3px;
+    background:linear-gradient(var(--teal),var(--blue));transform:scaleY(0);transition:transform .3s ease;
+}
+.nav-item:hover{color:var(--text);background:rgba(255,255,255,.05);transform:translateX(3px)}
+.nav-item.active{color:#fff;background:linear-gradient(90deg,rgba(45,212,191,.17),rgba(59,130,246,.05));border-color:rgba(45,212,191,.28)}
+.nav-item.active::before{transform:scaleY(1)}
+.nav-item.active .ico{background:linear-gradient(135deg,var(--teal),var(--blue));box-shadow:0 6px 18px rgba(45,212,191,.35)}
+.nav-item.active .nav-text small{color:#a7b6cd}
 
-                .container {
-                    position: relative;
-                    z-index: 1;
-                    max-width: 1180px;
-                    margin: 0 auto;
-                    background: linear-gradient(180deg, rgba(17, 25, 45, 0.82), rgba(10, 16, 30, 0.88));
-                    backdrop-filter: blur(18px);
-                    -webkit-backdrop-filter: blur(18px);
-                    border-radius: 24px;
-                    border: 1px solid var(--border);
-                    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-                    overflow: hidden;
-                    animation: containerIn 0.9s cubic-bezier(.2,.8,.2,1) both;
-                }
-                @keyframes containerIn {
-                    from { opacity: 0; transform: translateY(30px) scale(0.98); }
-                    to   { opacity: 1; transform: translateY(0) scale(1); }
-                }
+.team-card{margin-top:auto;padding:16px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.team-title{font-size:.7em;letter-spacing:1.4px;text-transform:uppercase;color:var(--teal);font-weight:700;margin-bottom:12px;line-height:1.5}
+.team-row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed rgba(148,163,184,.14);font-size:.8em}
+.team-row:last-child{border-bottom:none}
+.team-row span{color:var(--muted)}
+.team-row b{font-weight:600;text-align:right;color:var(--text)}
 
-                /* ===== Banner ===== */
-                .banner-container {
-                    position: relative;
-                    padding: 44px 32px 32px;
-                    text-align: center;
-                    background:
-                        radial-gradient(circle at 20% 0%, rgba(99, 102, 241, 0.35), transparent 55%),
-                        radial-gradient(circle at 85% 100%, rgba(34, 211, 238, 0.25), transparent 55%),
-                        linear-gradient(135deg, #0f1a33, #121c3a);
-                    border-bottom: 1px solid var(--border);
-                    overflow: hidden;
-                }
-                .banner-container::before {
-                    content: "";
-                    position: absolute;
-                    inset: 0;
-                    background-image:
-                        linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
-                        linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
-                    background-size: 42px 42px;
-                    animation: gridMove 24s linear infinite;
-                    mask-image: radial-gradient(circle at center, #000 30%, transparent 80%);
-                    -webkit-mask-image: radial-gradient(circle at center, #000 30%, transparent 80%);
-                }
-                @keyframes gridMove {
-                    from { background-position: 0 0, 0 0; }
-                    to   { background-position: 42px 42px, 42px 42px; }
-                }
-                .banner-header, .banner-info { position: relative; z-index: 1; }
+/* ===== Main column ===== */
+.main{display:flex;flex-direction:column;min-width:0;height:100vh;height:100dvh}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:20px 28px 12px;animation:fadeUp .7s .1s both}
+.topbar h1{font-size:1.55em;font-weight:800;letter-spacing:-.3px;background:linear-gradient(90deg,#fff,#a5f3fc 60%,#c4b5fd);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.topbar p{color:var(--muted);font-size:.9em;margin-top:2px}
+.chips{display:flex;gap:10px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04);font-size:.78em;font-weight:600;color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(52,211,153,.6)}70%{box-shadow:0 0 0 9px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+.content{flex:1;min-height:0;padding:6px 28px 16px;position:relative}
+.statusbar{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 28px;border-top:1px solid var(--line);font-size:.76em;color:var(--muted);background:rgba(6,9,16,.65)}
 
-                .banner-title {
-                    font-size: clamp(1.6em, 4vw, 2.7em);
-                    font-weight: 800;
-                    letter-spacing: 0.5px;
-                    background: linear-gradient(90deg, #ffffff, #a5b4fc, #67e8f9, #ffffff);
-                    background-size: 250% auto;
-                    -webkit-background-clip: text;
-                    background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    animation: shine 6s linear infinite;
-                    margin-bottom: 10px;
-                }
-                @keyframes shine {
-                    to { background-position: 250% center; }
-                }
-                .banner-subtitle {
-                    font-size: 1.05em;
-                    color: var(--muted);
-                    font-weight: 400;
-                    letter-spacing: 3px;
-                    text-transform: uppercase;
-                    animation: fadeUp 1s 0.2s both;
-                }
+/* ===== Panes / workspace ===== */
+.tab-pane{display:none;height:100%;overflow:auto}
+.tab-pane.active{display:block;animation:fadeUp .55s cubic-bezier(.2,.8,.2,1) both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.workspace{display:grid;grid-template-columns:minmax(380px,1.08fr) minmax(320px,1fr);grid-template-rows:minmax(0,1fr);gap:20px;height:100%;animation:fadeUp .6s both}
+.content>.workspace{height:100%}
 
-                .banner-info {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-                    gap: 14px;
-                    margin-top: 28px;
-                    padding: 18px 22px;
-                    background: rgba(7, 11, 20, 0.55);
-                    border-radius: 14px;
-                    border: 1px solid var(--border);
-                    text-align: left;
-                    animation: fadeUp 1s 0.35s both;
-                }
-                .info-row {
-                    display: flex;
-                    justify-content: space-between;
-                    gap: 12px;
-                    padding: 8px 0;
-                    border-bottom: 1px dashed rgba(148, 163, 184, 0.18);
-                    font-size: 0.93em;
-                }
-                .info-label { font-weight: 600; color: var(--accent); }
-                .info-value { color: var(--text); font-weight: 500; text-align: right; }
+.panel{
+    position:relative;min-height:0;overflow:auto;padding:26px;border-radius:22px;
+    background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    box-shadow:0 20px 50px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.04);
+}
+.panel.accent::before{
+    content:"";position:absolute;top:0;left:26px;right:26px;height:2px;
+    background:linear-gradient(90deg,transparent,var(--teal),var(--blue),var(--violet),transparent);
+    background-size:200% 100%;animation:slideBar 4s linear infinite;
+}
+@keyframes slideBar{from{background-position:200% 0}to{background-position:-200% 0}}
+.panel::-webkit-scrollbar,.tab-pane::-webkit-scrollbar,.history-list::-webkit-scrollbar,.sidebar::-webkit-scrollbar,.out-box::-webkit-scrollbar{width:8px;height:8px}
+.panel::-webkit-scrollbar-thumb,.tab-pane::-webkit-scrollbar-thumb,.history-list::-webkit-scrollbar-thumb,.sidebar::-webkit-scrollbar-thumb,.out-box::-webkit-scrollbar-thumb{background:rgba(99,120,170,.4);border-radius:8px}
 
-                /* ===== Main + Tabs ===== */
-                .main-content { padding: 32px; }
+.panel-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:22px}
+.step-badge{
+    width:44px;height:44px;flex:none;border-radius:13px;display:grid;place-items:center;
+    font-family:var(--mono);font-weight:700;color:var(--teal);
+    background:linear-gradient(135deg,rgba(45,212,191,.2),rgba(59,130,246,.2));border:1px solid rgba(45,212,191,.35);
+}
+.panel-head h2{font-size:1.2em;font-weight:700}
+.panel-head p{color:var(--muted);font-size:.88em;margin-top:2px}
 
-                .tabs {
-                    display: flex;
-                    flex-wrap: wrap;
-                    gap: 8px;
-                    margin-bottom: 30px;
-                    padding: 6px;
-                    background: rgba(7, 11, 20, 0.55);
-                    border: 1px solid var(--border);
-                    border-radius: 14px;
-                }
-                .tab-button {
-                    flex: 1;
-                    min-width: 160px;
-                    padding: 12px 20px;
-                    background: transparent;
-                    border: none;
-                    border-radius: 10px;
-                    color: var(--muted);
-                    font-family: inherit;
-                    font-size: 0.97em;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    position: relative;
-                    overflow: hidden;
-                }
-                .tab-button:hover {
-                    color: var(--text);
-                    background: var(--surface-2);
-                    transform: translateY(-1px);
-                }
-                .tab-button.active {
-                    color: #fff;
-                    background: linear-gradient(135deg, var(--primary), #4f46e5 55%, #0ea5c6);
-                    box-shadow: 0 8px 22px rgba(99, 102, 241, 0.45);
-                }
+/* ===== Forms ===== */
+.field{margin-bottom:18px}
+.field label{display:flex;justify-content:space-between;gap:10px;font-size:.76em;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#a9b8d2;margin-bottom:8px}
+.field label em{font-style:normal;font-weight:500;letter-spacing:.3px;text-transform:none;color:#64748b}
+.field input,.field textarea{
+    width:100%;padding:13px 15px;background:rgba(5,8,14,.65);border:1px solid var(--line);border-radius:12px;
+    color:var(--text);font:inherit;font-size:.96em;transition:all .3s ease;
+}
+.field textarea{min-height:92px;resize:vertical}
+.field input::placeholder,.field textarea::placeholder{color:#4f5f7a}
+.field input:focus,.field textarea:focus{outline:none;border-color:var(--teal);background:rgba(5,8,14,.9);box-shadow:0 0 0 4px rgba(45,212,191,.14),0 0 24px rgba(59,130,246,.12)}
+.hint{display:block;margin-top:6px;color:#64748b;font-size:.78em}
+.input-wrap{position:relative}
+.input-wrap input{padding-right:70px}
+.eye{position:absolute;right:8px;top:50%;transform:translateY(-50%);padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--muted);font:inherit;font-size:.74em;font-weight:600;cursor:pointer;transition:all .25s ease}
+.eye:hover{color:#fff;background:rgba(255,255,255,.12)}
+.row-2{display:grid;grid-template-columns:1.6fr 1fr;gap:14px}
 
-                .tab-pane { display: none; }
-                .tab-pane.active { display: block; animation: fadeUp 0.55s cubic-bezier(.2,.8,.2,1) both; }
+.btn{
+    position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:10px;
+    padding:14px 22px;border:1px solid transparent;border-radius:12px;font:inherit;font-weight:700;font-size:.95em;color:#fff;
+    cursor:pointer;text-decoration:none;letter-spacing:.4px;transition:all .3s ease;
+}
+.btn::after{content:"";position:absolute;top:0;left:-80%;width:50%;height:100%;background:linear-gradient(120deg,transparent,rgba(255,255,255,.35),transparent);transform:skewX(-20deg);transition:left .7s ease}
+.btn:hover::after{left:130%}
+.btn:hover{transform:translateY(-3px);filter:brightness(1.08)}
+.btn:active{transform:translateY(-1px)}
+.btn-block{width:100%;margin-top:6px;padding:16px;text-transform:uppercase;letter-spacing:1.4px}
+.btn-encrypt{background:linear-gradient(135deg,#14b8a6,#3b82f6);box-shadow:0 12px 28px rgba(20,184,166,.28)}
+.btn-decrypt{background:linear-gradient(135deg,#8b5cf6,#3b82f6);box-shadow:0 12px 28px rgba(139,92,246,.3)}
+.btn-save{background:linear-gradient(135deg,#7c3aed,#a78bfa);box-shadow:0 10px 24px rgba(124,58,237,.3)}
+.btn-danger{background:linear-gradient(135deg,#dc2626,#f97316);box-shadow:0 10px 24px rgba(220,38,38,.3)}
+.btn-ghost{background:rgba(255,255,255,.06);border-color:var(--line);color:var(--text)}
+.btn-ghost:hover{background:rgba(255,255,255,.1)}
 
-                @keyframes fadeUp {
-                    from { opacity: 0; transform: translateY(16px); }
-                    to   { opacity: 1; transform: translateY(0); }
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to   { opacity: 1; }
-                }
+/* ===== Side cards ===== */
+.card{padding:18px;border-radius:16px;background:var(--card);border:1px solid var(--line);margin-bottom:16px}
+.card:last-child{margin-bottom:0}
+.card-title{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:.74em;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--teal);margin-bottom:14px}
+.pill{padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.05);font-size:.95em;letter-spacing:.3px;text-transform:none;color:var(--muted)}
+.pill.ok{color:var(--green);border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.1)}
 
-                /* ===== Forms ===== */
-                .cipher-form {
-                    max-width: 800px;
-                    margin: 0 auto;
-                    background: var(--surface);
-                    padding: 34px;
-                    border-radius: 18px;
-                    border: 1px solid var(--border);
-                    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3);
-                    position: relative;
-                }
-                .cipher-form::before {
-                    content: "";
-                    position: absolute;
-                    top: 0; left: 24px; right: 24px;
-                    height: 2px;
-                    background: linear-gradient(90deg, transparent, var(--primary-2), var(--primary), transparent);
-                    background-size: 200% 100%;
-                    animation: slideBar 4s linear infinite;
-                }
-                @keyframes slideBar {
-                    from { background-position: 200% 0; }
-                    to   { background-position: -200% 0; }
-                }
+.meter-row{display:grid;grid-template-columns:1fr auto;gap:6px 10px;margin-bottom:12px;font-size:.85em}
+.m-name{color:#b6c3da}
+.m-val{font-family:var(--mono);color:var(--text)}
+.meter{grid-column:1 / -1;height:8px;border-radius:8px;background:rgba(255,255,255,.07);overflow:hidden}
+.meter i{display:block;height:100%;width:0;border-radius:8px;background:linear-gradient(90deg,var(--teal),var(--blue));box-shadow:0 0 12px rgba(45,212,191,.5);transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.drift-grid,.stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.drift-grid{margin-top:6px}
+.stat{padding:14px 16px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line);transition:all .3s ease}
+.stat:hover{border-color:rgba(45,212,191,.45);transform:translateY(-2px)}
+.stat label{display:block;font-size:.7em;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:4px}
+.stat .v{font-family:var(--mono);font-size:1.3em;font-weight:700}
+.stat .v.verified{color:var(--green)}
+.stat .v.not-verified{color:var(--red)}
 
-                .form-group { margin-bottom: 22px; }
-                .form-group label {
-                    display: block;
-                    margin-bottom: 8px;
-                    font-weight: 600;
-                    color: #c7d2fe;
-                    font-size: 0.95em;
-                    letter-spacing: 0.3px;
-                }
-                .form-group input[type="text"],
-                .form-group input[type="password"],
-                .form-group input[type="number"],
-                .form-group textarea {
-                    width: 100%;
-                    padding: 14px 16px;
-                    background: rgba(7, 11, 20, 0.6);
-                    border: 1px solid var(--border);
-                    border-radius: 12px;
-                    color: var(--text);
-                    font-family: inherit;
-                    font-size: 1em;
-                    transition: all 0.3s ease;
-                }
-                .form-group input::placeholder,
-                .form-group textarea::placeholder { color: #5b6b85; }
-                .form-group textarea { min-height: 100px; resize: vertical; }
-                .form-group input:focus,
-                .form-group textarea:focus {
-                    outline: none;
-                    border-color: var(--primary);
-                    background: rgba(7, 11, 20, 0.85);
-                    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2), 0 0 24px rgba(34, 211, 238, 0.12);
-                }
-                .form-help { display: block; margin-top: 6px; color: var(--muted); font-size: 0.85em; }
+.flow{position:relative;display:flex;flex-direction:column;gap:4px}
+.flow::before{content:"";position:absolute;left:21px;top:22px;bottom:22px;width:2px;background:linear-gradient(var(--teal),var(--violet));opacity:.35}
+.flow-step{position:relative;display:flex;gap:14px;align-items:flex-start;padding:10px 12px;border-radius:12px;border:1px solid transparent;animation:stepGlow 7.5s infinite;animation-delay:calc(var(--i) * 1.5s)}
+.flow-num{position:relative;z-index:1;width:20px;height:20px;margin-left:2px;flex:none;border-radius:50%;display:grid;place-items:center;background:#0c1424;border:1px solid rgba(45,212,191,.5);font-weight:700;font-size:.66em;color:var(--teal)}
+.flow-step b{font-size:.92em}
+.flow-step p{color:var(--muted);font-size:.8em}
+@keyframes stepGlow{
+    0%{background:rgba(45,212,191,.13);border-color:rgba(45,212,191,.38)}
+    17%{background:rgba(45,212,191,.13);border-color:rgba(45,212,191,.38)}
+    22%,100%{background:transparent;border-color:transparent}
+}
+.check-list{list-style:none}
+.check-list li{display:flex;gap:12px;align-items:center;padding:10px 6px;border-bottom:1px solid rgba(148,163,184,.1);font-size:.9em;color:#c6d2e6}
+.check-list li:last-child{border-bottom:none}
+.check-list li span{width:22px;height:22px;flex:none;display:grid;place-items:center;border-radius:50%;background:rgba(52,211,153,.14);color:var(--green);font-size:.8em;font-weight:700}
 
-                .submit-btn {
-                    position: relative;
-                    overflow: hidden;
-                    width: 100%;
-                    padding: 16px;
-                    border: none;
-                    border-radius: 12px;
-                    font-family: inherit;
-                    font-size: 1.02em;
-                    font-weight: 700;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    text-transform: uppercase;
-                    letter-spacing: 1.5px;
-                    margin-top: 8px;
-                    color: #fff;
-                }
-                .submit-btn::after {
-                    content: "";
-                    position: absolute;
-                    top: 0; left: -80%;
-                    width: 50%; height: 100%;
-                    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.35), transparent);
-                    transform: skewX(-20deg);
-                    transition: left 0.7s ease;
-                }
-                .submit-btn:hover::after { left: 130%; }
-                .encrypt-btn {
-                    background: linear-gradient(135deg, #4f46e5, #06b6d4);
-                    box-shadow: 0 10px 26px rgba(79, 70, 229, 0.4);
-                }
-                .decrypt-btn {
-                    background: linear-gradient(135deg, #0d9488, #10b981);
-                    box-shadow: 0 10px 26px rgba(16, 185, 129, 0.35);
-                }
-                .submit-btn:hover { transform: translateY(-3px); filter: brightness(1.08); }
-                .submit-btn:active { transform: translateY(-1px); }
+/* ===== Toast ===== */
+.toast{
+    position:fixed;top:20px;right:24px;z-index:60;display:flex;align-items:center;gap:12px;
+    min-width:280px;max-width:480px;padding:14px 16px;border-radius:14px;border:1px solid;font-weight:600;font-size:.92em;
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 18px 40px rgba(0,0,0,.45);
+    animation:toastIn .5s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes toastIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+.toast-icon{width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:50%;background:rgba(255,255,255,.1)}
+.toast-text{flex:1}
+.toast-close{background:none;border:none;color:inherit;font-size:1.4em;cursor:pointer;opacity:.7;line-height:1}
+.toast-close:hover{opacity:1}
+.toast.success{background:rgba(8,40,32,.92);border-color:rgba(52,211,153,.55);color:#86efac}
+.toast.error{background:rgba(48,14,18,.92);border-color:rgba(248,113,113,.55);color:#fca5a5;animation:toastIn .5s cubic-bezier(.2,.8,.2,1),shake .5s .5s}
+.toast.info{background:rgba(8,32,48,.92);border-color:rgba(56,189,248,.55);color:#7dd3fc}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 
-                /* ===== Messages ===== */
-                .message {
-                    padding: 14px 24px;
-                    margin: 22px auto 0;
-                    border-radius: 12px;
-                    max-width: 800px;
-                    font-weight: 600;
-                    text-align: center;
-                    border: 1px solid;
-                    animation: slideIn 0.5s ease;
-                }
-                @keyframes slideIn {
-                    from { opacity: 0; transform: translateY(-14px); }
-                    to   { opacity: 1; transform: translateY(0); }
-                }
-                .message.success { background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.5); color: #6ee7b7; }
-                .message.error   { background: rgba(239, 68, 68, 0.12);  border-color: rgba(239, 68, 68, 0.5);  color: #fca5a5; animation: slideIn 0.5s ease, shake 0.5s 0.1s; }
-                .message.info    { background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.5); color: #7dd3fc; }
-                @keyframes shake {
-                    0%,100% { transform: translateX(0); }
-                    25% { transform: translateX(-6px); }
-                    75% { transform: translateX(6px); }
-                }
+/* ===== Result view ===== */
+.status{display:flex;align-items:center;gap:16px;padding:18px 20px;border-radius:18px;margin-bottom:18px;border:1px solid}
+.status h2{font-size:1.2em}
+.status p{font-size:.86em;color:var(--muted)}
+.status-icon{position:relative;width:52px;height:52px;flex:none;display:grid;place-items:center;border-radius:50%;font-size:1.5em;background:rgba(255,255,255,.08)}
+.status-icon::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid currentColor;opacity:.4;animation:ring 2.4s ease-out infinite}
+@keyframes ring{0%{transform:scale(.85);opacity:.6}100%{transform:scale(1.35);opacity:0}}
+.status.success{color:var(--green);background:linear-gradient(135deg,rgba(16,185,129,.18),rgba(45,212,191,.06));border-color:rgba(52,211,153,.4)}
+.status.warning{color:var(--amber);background:linear-gradient(135deg,rgba(245,158,11,.18),rgba(239,68,68,.06));border-color:rgba(251,191,36,.4)}
+.status h2{color:#fff}
+.out{margin-top:18px}
+.out-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;font-size:.74em;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:#a9b8d2}
+.tag{margin-left:8px;padding:2px 9px;border-radius:999px;font-size:.95em;letter-spacing:.4px;border:1px solid}
+.tag.valid{color:var(--green);border-color:rgba(52,211,153,.4);background:rgba(52,211,153,.1)}
+.tag.suspicious{color:var(--amber);border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.1)}
+.copy-mini{padding:6px 12px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.06);color:var(--text);font:inherit;font-size:.9em;font-weight:600;letter-spacing:0;text-transform:none;cursor:pointer;transition:all .25s ease}
+.copy-mini:hover{background:linear-gradient(135deg,#2563eb,#38bdf8);border-color:transparent;transform:translateY(-2px)}
+.out-box{max-height:170px;overflow:auto;padding:14px 16px;border-radius:12px;background:rgba(4,7,13,.75);border:1px solid var(--line);font-family:var(--mono);font-size:.9em;word-break:break-all;white-space:pre-wrap}
+.out-box.hex-string{color:var(--teal)}
+.out-box.recovered-text{color:var(--amber);font-weight:600}
+.result-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:22px}
+.result-actions form{display:inline-flex}
 
-                /* ===== Results ===== */
-                .result-container { max-width: 1000px; margin: 0 auto; padding: 32px; animation: fadeUp 0.7s ease both; }
+/* ===== Analysis ===== */
+.summary-section,.history-section{margin-bottom:22px}
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.summary-item{display:flex;flex-direction:column;gap:3px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.035);border:1px solid var(--line);transition:all .3s ease;min-width:0}
+.summary-item:hover{border-color:rgba(45,212,191,.45);transform:translateY(-2px)}
+.summary-label{font-size:.68em;letter-spacing:1.3px;text-transform:uppercase;color:var(--muted);font-weight:600}
+.summary-val{font-family:var(--mono);font-size:.92em;word-break:break-all}
+.summary-val.valid,.summary-val.verified{color:var(--green);font-weight:700}
+.summary-val.suspicious{color:var(--amber);font-weight:700}
+.summary-val.not-verified{color:var(--red);font-weight:700}
+.history-list{padding:12px;border-radius:14px;background:#04070d;border:1px solid var(--line);font-family:var(--mono);font-size:.8em;max-height:420px;overflow:auto}
+.history-item{padding:4px 8px;color:#b4c2d9;word-break:break-all;border-radius:6px}
+.history-item:hover{background:rgba(255,255,255,.04)}
+.history-item.h{color:var(--teal);font-weight:700;margin-top:10px}
+.history-item.sub{color:var(--amber);margin-top:6px}
+.history-item.op{color:#7c8ba3;padding-left:22px}
+.history-item.ok{color:var(--green)}
 
-                .result-header {
-                    padding: 28px;
-                    border-radius: 18px;
-                    margin-bottom: 26px;
-                    text-align: center;
-                    background: linear-gradient(135deg, #4f46e5, #7c3aed);
-                    box-shadow: 0 14px 34px rgba(79, 70, 229, 0.35);
-                    position: relative;
-                    overflow: hidden;
-                }
-                .result-header::after {
-                    content: "";
-                    position: absolute;
-                    top: 0; left: -60%;
-                    width: 40%; height: 100%;
-                    background: linear-gradient(120deg, transparent, rgba(255,255,255,0.25), transparent);
-                    transform: skewX(-20deg);
-                    animation: sweep 3.5s ease-in-out infinite;
-                }
-                @keyframes sweep { 0% { left: -60%; } 60%,100% { left: 140%; } }
-                .result-header.success { background: linear-gradient(135deg, #0f766e, #10b981); box-shadow: 0 14px 34px rgba(16, 185, 129, 0.3); }
-                .result-header.warning { background: linear-gradient(135deg, #b45309, #f59e0b); box-shadow: 0 14px 34px rgba(245, 158, 11, 0.3); }
-                .result-header h2 { font-size: 2em; color: #fff; position: relative; z-index: 1; }
+/* ===== Explanation / tools ===== */
+.explain-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:18px;padding:2px 2px 8px}
+.explain-grid .card{margin:0;padding:22px;background:var(--panel);box-shadow:0 14px 34px rgba(0,0,0,.28)}
+.explain-grid .card.wide{grid-column:1 / -1}
+.info-item{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px dashed rgba(148,163,184,.16);font-size:.92em}
+.info-item:last-child{border-bottom:none}
+.info-item span{color:var(--muted)}
+.features-list,.usage-section ul,.important-notes ul{list-style:none}
+.features-list li,.usage-section ul li,.important-notes ul li{padding:9px 10px;border-bottom:1px solid rgba(148,163,184,.1);border-radius:8px;font-size:.92em;color:#d3deef;transition:all .25s ease}
+.features-list li:hover,.usage-section ul li:hover,.important-notes ul li:hover{background:rgba(255,255,255,.05);padding-left:16px}
+.features-list li:before{content:"✓";color:var(--green);margin-right:10px;font-weight:700}
+.usage-subsection{margin-bottom:14px}
+.subsection-title{font-weight:700;color:var(--amber);margin-bottom:6px;font-size:.95em}
+.algo-steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.algo-step{padding:16px;border-radius:14px;background:rgba(255,255,255,.035);border:1px solid var(--line);transition:all .3s ease}
+.algo-step:hover{border-color:rgba(139,92,246,.5);transform:translateY(-3px)}
+.algo-step b{display:block;color:#c4b5fd;margin-bottom:6px;font-size:.92em}
+.algo-step p{color:var(--muted);font-size:.84em}
+.tool-card p{color:var(--muted);margin-bottom:14px;font-size:.92em}
+.file-chip{display:inline-block;margin-bottom:16px;padding:6px 12px;border-radius:8px;background:rgba(4,7,13,.75);border:1px solid var(--line);font-family:var(--mono);font-size:.82em;color:var(--teal)}
 
-                .result-details {
-                    background: var(--surface);
-                    border-radius: 18px;
-                    padding: 30px;
-                    border: 1px solid var(--border);
-                    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3);
-                }
-                .result-card { margin-bottom: 24px; }
-                .result-card h3 {
-                    color: var(--primary-2);
-                    margin-bottom: 18px;
-                    padding-bottom: 10px;
-                    border-bottom: 1px solid var(--border);
-                    font-weight: 700;
-                }
-                .result-item {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    gap: 16px;
-                    padding: 12px 8px;
-                    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-                    border-radius: 8px;
-                    transition: background 0.25s ease;
-                    animation: fadeUp 0.6s both;
-                }
-                .result-item:nth-child(2) { animation-delay: 0.05s; }
-                .result-item:nth-child(3) { animation-delay: 0.1s; }
-                .result-item:nth-child(4) { animation-delay: 0.15s; }
-                .result-item:nth-child(5) { animation-delay: 0.2s; }
-                .result-item:nth-child(6) { animation-delay: 0.25s; }
-                .result-item:nth-child(7) { animation-delay: 0.3s; }
-                .result-item:hover { background: var(--surface-2); }
-                .result-item label { font-weight: 600; color: var(--muted); white-space: nowrap; }
-                .result-item .value {
-                    font-family: var(--mono);
-                    font-size: 0.98em;
-                    word-break: break-all;
-                    text-align: right;
-                    max-width: 65%;
-                }
-                .result-item .hex-string { color: var(--primary-2); font-weight: 600; }
-                .result-item .recovered-text { color: var(--accent); font-weight: 600; }
-                .result-item .verified, .result-item .valid { color: #34d399; font-weight: 700; }
-                .result-item .not-verified { color: #f87171; font-weight: 700; }
-                .result-item .suspicious { color: #fbbf24; font-weight: 700; }
+.footer-line{opacity:.9}
 
-                .result-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 26px; }
-                .action-btn {
-                    padding: 12px 22px;
-                    border: 1px solid var(--border);
-                    border-radius: 10px;
-                    font-family: inherit;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 8px;
-                    color: #fff;
-                    background: var(--surface-2);
-                }
-                .copy-btn     { background: linear-gradient(135deg, #2563eb, #38bdf8); border-color: transparent; }
-                .save-btn     { background: linear-gradient(135deg, #7c3aed, #a78bfa); border-color: transparent; }
-                .analysis-btn { background: linear-gradient(135deg, #d97706, #f5b942); border-color: transparent; color: #1b1405; }
-                .action-btn:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4); }
+/* ===== Responsive ===== */
+@media (max-width:1100px){
+    .workspace{grid-template-columns:1fr 1fr}
+    .row-2{grid-template-columns:1fr}
+}
+@media (max-width:960px){
+    body{overflow:auto}
+    .app{display:block;height:auto;min-height:100vh}
+    .sidebar{border-right:none;border-bottom:1px solid var(--line);padding:14px;gap:12px}
+    .nav{flex-direction:row;flex-wrap:wrap}
+    .nav-item{flex:1;min-width:150px}
+    .team-card{display:none}
+    .main{height:auto}
+    .content{overflow:visible;padding:8px 14px 16px}
+    .tab-pane{height:auto;overflow:visible}
+    .workspace{grid-template-columns:1fr;grid-template-rows:auto;height:auto}
+    .content>.workspace{height:auto}
+    .panel{overflow:visible}
+    .topbar{flex-direction:column;align-items:flex-start;padding:16px 14px 8px}
+    .statusbar{padding:10px 14px}
+    .toast{left:14px;right:14px;min-width:0;max-width:none}
+    .stat-grid,.drift-grid{grid-template-columns:1fr 1fr}
+}
+@media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation:none !important;transition:none !important}
+}
+</style>
+<script>
+function switchTab(name){
+    var pane=document.getElementById(name+"-tab");
+    if(!pane){return;}
+    document.querySelectorAll(".tab-pane").forEach(function(p){p.classList.remove("active");});
+    pane.classList.add("active");
+    document.querySelectorAll(".nav-item[data-tab]").forEach(function(b){
+        if(b.tagName!=="BUTTON"){return;}
+        var on=b.getAttribute("data-tab")===name;
+        b.classList.toggle("active",on);
+        if(on){
+            var t=document.getElementById("page-title");
+            var s=document.getElementById("page-sub");
+            if(t){t.textContent=b.getAttribute("data-title");}
+            if(s){s.textContent=b.getAttribute("data-sub");}
+        }
+    });
+    var c=document.querySelector(".content");
+    if(c){c.scrollTop=0;}
+}
 
-                .navigation { margin-top: 28px; text-align: center; }
-                .nav-btn {
-                    display: inline-block;
-                    padding: 12px 30px;
-                    background: var(--surface-2);
-                    color: var(--text);
-                    text-decoration: none;
-                    border-radius: 10px;
-                    font-weight: 600;
-                    border: 1px solid var(--border);
-                    transition: all 0.3s ease;
-                }
-                .nav-btn:hover {
-                    background: linear-gradient(135deg, var(--primary), #0ea5c6);
-                    border-color: transparent;
-                    transform: translateX(-4px);
-                    box-shadow: 0 10px 24px rgba(99, 102, 241, 0.4);
-                }
+function togglePw(btn){
+    var i=btn.parentNode.querySelector("input");
+    if(!i){return;}
+    var show=i.type==="password";
+    i.type=show?"text":"password";
+    btn.textContent=show?"Hide":"Show";
+}
 
-                /* ===== Tools ===== */
-                .tools-container { display: grid; gap: 20px; margin-top: 10px; }
-                .tool-card {
-                    background: var(--surface);
-                    padding: 26px;
-                    border-radius: 16px;
-                    border: 1px solid var(--border);
-                    transition: all 0.3s ease;
-                }
-                .tool-card:hover { transform: translateY(-4px); border-color: rgba(99, 102, 241, 0.5); box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35); }
-                .tool-card h3 { color: var(--accent); margin-bottom: 8px; }
-                .tool-card p { color: var(--muted); margin-bottom: 18px; }
-                .tool-btn {
-                    padding: 12px 24px;
-                    border: none;
-                    border-radius: 10px;
-                    font-family: inherit;
-                    font-weight: 600;
-                    cursor: pointer;
-                    transition: all 0.3s ease;
-                    color: #fff;
-                }
-                .warning-btn { background: linear-gradient(135deg, #dc2626, #f97316); }
-                .tool-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 24px rgba(220, 38, 38, 0.4); }
+function doCopy(text,btn){
+    function done(){
+        if(!btn){return;}
+        var old=btn.getAttribute("data-label")||btn.textContent;
+        btn.setAttribute("data-label",old);
+        btn.textContent="✓ Copied";
+        setTimeout(function(){btn.textContent=old;},1600);
+    }
+    function fallback(){
+        var ta=document.createElement("textarea");
+        ta.value=text;ta.style.position="fixed";ta.style.opacity="0";
+        document.body.appendChild(ta);ta.select();
+        try{document.execCommand("copy");done();}catch(e){console.error(e);}
+        document.body.removeChild(ta);
+    }
+    if(navigator.clipboard&&window.isSecureContext){
+        navigator.clipboard.writeText(text).then(done).catch(fallback);
+    }else{
+        fallback();
+    }
+}
+function copyFrom(btn){doCopy(btn.getAttribute("data-copy")||"",btn);}
+function copyToClipboard(text){doCopy(text,null);}
 
-                /* ===== Explanation / Analysis ===== */
-                .explanation-container,
-                .analysis-container {
-                    background: var(--surface);
-                    border-radius: 18px;
-                    padding: 32px;
-                    border: 1px solid var(--border);
-                    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3);
-                    margin-top: 10px;
-                }
-                .explanation-header,
-                .analysis-header {
-                    font-size: 1.7em;
-                    font-weight: 800;
-                    background: linear-gradient(90deg, #a5b4fc, #67e8f9);
-                    -webkit-background-clip: text;
-                    background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    margin-bottom: 22px;
-                    text-align: center;
-                }
-                .developer-info {
-                    background: rgba(7, 11, 20, 0.55);
-                    padding: 20px;
-                    border-radius: 12px;
-                    margin-bottom: 26px;
-                    border: 1px solid var(--border);
-                }
-                .info-item { margin-bottom: 8px; display: flex; gap: 10px; }
-                .info-item strong { color: var(--accent); }
+function updateLive(){
+    var inp=document.getElementById("factors");
+    if(!inp){return;}
+    var parts=inp.value.split(",").map(function(s){return s.trim();}).filter(function(s){return s!=="";});
+    var vals=parts.map(function(s){
+        var n=Number(s);
+        if(!isFinite(n)){return null;}
+        return Math.min(1,Math.max(0,n));
+    });
+    var ok=(parts.length===3)&&vals.every(function(v){return v!==null;});
+    for(var i=0;i<3;i++){
+        var bar=document.getElementById("bar-"+i);
+        var val=document.getElementById("val-"+i);
+        var v=(vals[i]!==undefined&&vals[i]!==null)?vals[i]:null;
+        if(bar){bar.style.width=(v!==null?v*100:0)+"%";}
+        if(val){val.textContent=(v!==null)?v.toFixed(2):"—";}
+    }
+    var d=document.getElementById("live-drift");
+    var w=document.getElementById("live-wdrift");
+    var st=document.getElementById("live-status");
+    if(ok){
+        var sum=0,num=0,den=0;
+        vals.forEach(function(v){sum+=v;num+=v*v*v;den+=v*v;});
+        if(d){d.textContent=(sum/3).toFixed(4);}
+        if(w){w.textContent=(den>0?num/den:0).toFixed(4);}
+        if(st){st.textContent="Valid · 3 factors";st.classList.add("ok");}
+    }else{
+        if(d){d.textContent="—";}
+        if(w){w.textContent="—";}
+        if(st){st.textContent=Math.min(parts.length,9)+" / 3 factors";st.classList.remove("ok");}
+    }
+}
 
-                .features-section, .usage-section, .important-notes { margin-bottom: 28px; }
-                .section-title {
-                    font-size: 1.25em;
-                    font-weight: 700;
-                    color: var(--primary-2);
-                    margin-bottom: 14px;
-                    padding-bottom: 8px;
-                    border-bottom: 1px solid var(--border);
-                }
-                .features-list, .usage-section ul, .important-notes ul { list-style: none; padding-left: 0; }
-                .features-list li, .usage-section ul li, .important-notes ul li {
-                    padding: 10px 12px;
-                    border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-                    color: var(--text);
-                    transition: all 0.25s ease;
-                    border-radius: 8px;
-                }
-                .features-list li:hover, .usage-section ul li:hover, .important-notes ul li:hover {
-                    background: var(--surface-2);
-                    padding-left: 18px;
-                }
-                .features-list li:before { content: "✓"; color: var(--success); margin-right: 10px; font-weight: bold; }
-                .usage-subsection { margin-bottom: 18px; }
-                .subsection-title { font-size: 1.05em; font-weight: 600; color: var(--accent); margin-bottom: 8px; }
+document.addEventListener("DOMContentLoaded",function(){
+    var hasToast=document.querySelector(".toast");
+    var h=(location.hash||"").replace("#","");
+    if(!hasToast&&h&&document.getElementById(h+"-tab")){switchTab(h);}
+    updateLive();
+});
+</script>
+</head>
+CMCHEAD;
 
-                .history-section, .summary-section { margin-bottom: 24px; }
-                .history-list {
-                    background: rgba(7, 11, 20, 0.7);
-                    border-radius: 12px;
-                    padding: 12px;
-                    max-height: 320px;
-                    overflow-y: auto;
-                    border: 1px solid var(--border);
-                }
-                .history-list::-webkit-scrollbar { width: 8px; }
-                .history-list::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.5); border-radius: 8px; }
-                .history-item {
-                    padding: 7px 12px;
-                    border-bottom: 1px solid rgba(148, 163, 184, 0.08);
-                    font-family: var(--mono);
-                    font-size: 0.86em;
-                    color: #cbd5e1;
-                }
-                .history-item:last-child { border-bottom: none; }
-                .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
-                .summary-item {
-                    background: rgba(7, 11, 20, 0.55);
-                    padding: 12px 16px;
-                    border-radius: 10px;
-                    border: 1px solid var(--border);
-                    transition: all 0.3s ease;
-                }
-                .summary-item:hover { border-color: rgba(34, 211, 238, 0.5); transform: translateY(-2px); }
-                .summary-label { font-weight: 600; color: var(--accent); margin-right: 8px; }
-                .summary-item .valid, .summary-item .verified { color: #34d399; font-weight: 700; }
-                .summary-item .suspicious { color: #fbbf24; font-weight: 700; }
-                .summary-item .not-verified { color: #f87171; font-weight: 700; }
+        $html .= '<body class="mode-' . htmlspecialchars($mode) . '">';
+        $html .= '<div class="app">';
+        $html .= $this->displayBrowserBanner($mode, $active);
+        $html .= '<main class="main">';
+        $html .= '<header class="topbar">';
+        $html .= '<div><h1 id="page-title">' . htmlspecialchars($title) . '</h1><p id="page-sub">' . htmlspecialchars($sub) . '</p></div>';
+        $html .= '<div class="chips"><span class="chip">v' . htmlspecialchars($this->projectVersion) . '</span><span class="chip"><i class="dot"></i>System online</span></div>';
+        $html .= '</header>';
+        $html .= '<div class="content">';
 
-                .footer {
-                    text-align: center;
-                    padding: 24px;
-                    color: var(--muted);
-                    font-size: 0.88em;
-                    border-top: 1px solid var(--border);
-                    background: rgba(7, 11, 20, 0.5);
-                }
-
-                @media (max-width: 768px) {
-                    body { padding: 12px; }
-                    .main-content, .result-container { padding: 18px; }
-                    .cipher-form { padding: 22px; }
-                    .tabs { flex-direction: column; }
-                    .tab-button { width: 100%; }
-                    .result-item { flex-direction: column; align-items: flex-start; gap: 4px; }
-                    .result-item .value { max-width: 100%; text-align: left; }
-                    .result-actions { flex-direction: column; }
-                    .action-btn { justify-content: center; }
-                }
-
-                @media (prefers-reduced-motion: reduce) {
-                    *, *::before, *::after { animation: none !important; transition: none !important; }
-                }
-            </style>
-            <script>
-                function switchTab(tabName) {
-                    document.querySelectorAll(".tab-pane").forEach(function(tab) {
-                        tab.classList.remove("active");
-                    });
-                    document.querySelectorAll(".tab-button").forEach(function(btn) {
-                        btn.classList.remove("active");
-                        var oc = btn.getAttribute("onclick") || "";
-                        if (oc.indexOf(tabName) !== -1) {
-                            btn.classList.add("active");
-                        }
-                    });
-                    var pane = document.getElementById(tabName + "-tab");
-                    if (pane) { pane.classList.add("active"); }
-                }
-
-                function copyToClipboard(text) {
-                    navigator.clipboard.writeText(text).then(function() {
-                        alert("Copied to clipboard!");
-                    }).catch(function(err) {
-                        console.error("Failed to copy: ", err);
-                    });
-                }
-
-                function showAnalysis() {
-                    var section = document.getElementById("analysis-section");
-                    var btn = document.querySelector(".analysis-btn");
-                    if (!section) { return; }
-                    if (section.style.display === "none") {
-                        section.style.display = "block";
-                        section.style.animation = "fadeUp 0.5s ease both";
-                        if (btn) { btn.textContent = "📊 Hide Analysis"; }
-                    } else {
-                        section.style.display = "none";
-                        if (btn) { btn.textContent = "📊 Show Analysis"; }
-                    }
-                }
-
-                document.addEventListener("DOMContentLoaded", function() {
-                    if (document.getElementById("encrypt-tab")) {
-                        switchTab("encrypt");
-                    }
-                });
-            </script>
-        </head>
-        <body>
-        <div class="container">';
-
-        $html .= $this->displayBrowserBanner();
         return $html;
     }
 
     /**
-     * Get browser footer
+     * Close content / main / app + status bar footer
      */
     private function getBrowserFooter() {
-        $html = '
-            <div class="footer">
-                <p>© 2026 Cognitive Metamorphic Cipher System | Version ' . $this->projectVersion . '</p>
-                <p>Developed by ' . htmlspecialchars($this->developerName) . ' | ' . htmlspecialchars($this->studentID) . '</p>
-                <p>' . htmlspecialchars($this->university) . '</p>
-            </div>
+        $html = '</div>
+            <footer class="statusbar">
+                <span class="footer-line">© 2026 Cognitive Metamorphic Cipher System | Version ' . htmlspecialchars($this->projectVersion) . '</span>
+                <span class="footer-line">Developed by ' . htmlspecialchars($this->developerName) . ' | ' . htmlspecialchars($this->studentID) . ' | ' . htmlspecialchars($this->university) . '</span>
+            </footer>
+        </main>
         </div>
         </body>
         </html>';
